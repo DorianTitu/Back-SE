@@ -11,8 +11,9 @@ COPY package*.json ./
 # Usa npm ci si hay package-lock.json; si no, cae a npm install
 RUN npm ci --only=production || npm install --only=production
 
-# Copiar el código
-COPY src ./src
+# Copiar el código y archivos estáticos
+COPY src/ ./src/
+COPY data/ ./data/
 
 # Variables y puertos
 ENV NODE_ENV=production
