@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consumidor de API Temperaturas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .button-group {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .loading {
+            text-align: center;
+            color: #667eea;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #c33;
+        }
+
+        .temperature-list {
+            margin-top: 30px;
+        }
+
+        .temp-item {
+            background: #f5f5f5;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+
+        .temp-item h3 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .temp-item p {
+            color: #666;
+            font-size: 14px;
+            margin: 3px 0;
+        }
+
+        .temp-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌡️ Monitor de Temperaturas</h1>
+        
+        <div class="button-group">
+            <button onclick="obtenerTemperaturas()">Obtener Temperaturas</button>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            Cargando datos...
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <div id="data" class="temperature-list"></div>
+    </div>
+
+    <script>
+        const API_URL = '/api';
+
+        async function obtenerTemperaturas() {
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const data = document.getElementById('data');
+
+            // Limpiar estados anteriores
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            data.innerHTML = '';
+
+            try {
+                const response = await fetch(`${API_URL}/temperaturas`);
+                
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+
+                const resultado = await response.json();
+                loading.style.display = 'none';
+
+                // El servidor devuelve { ok: true, data: [...] }
+                const temperaturas = resultado.data;
+
+                if (!temperaturas || (Array.isArray(temperaturas) && temperaturas.length === 0)) {
+                    data.innerHTML = '<div class="no-data">No hay datos de temperaturas disponibles</div>';
+                    return;
+                }
+
+                // Si es un array
+                if (Array.isArray(temperaturas)) {
+                    data.innerHTML = temperaturas.map((temp, index) => `
+                        <div class="temp-item">
+                            <h3>Registro #${index + 1}</h3>
+                            <p><strong>Temperatura:</strong> <span class="temp-value">${temp.temperatura || temp.valor || 'N/A'}°C</span></p>
+                            <p><strong>Fecha:</strong> ${new Date(temp.timestamp || temp.fecha).toLocaleString() || 'N/A'}</p>
+                            ${temp.ubicacion ? `<p><strong>Ubicación:</strong> ${temp.ubicacion}</p>` : ''}
+                            ${temp.id ? `<p><strong>ID:</strong> ${temp.id}</p>` : ''}
+                        </div>
+                    `).join('');
+                } else {
+                    // Si es un objeto
+                    data.innerHTML = `
+                        <div class="temp-item">
+                            <h3>Datos de Temperatura</h3>
+                            <pre>${JSON.stringify(temperaturas, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+
+            } catch (err) {
+                loading.style.display = 'none';
+                error.style.display = 'block';
+                error.textContent = `❌ Error: ${err.message}`;
+                console.error('Error:', err);
+            }
+        }
+
+        // Obtener temperaturas automáticamente al cargar la página
+        window.addEventListener('load', () => {
+            obtenerTemperaturas();
+        });
+    </script>
+</body>
+</html>

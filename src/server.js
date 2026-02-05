@@ -5,6 +5,18 @@ const { appendTemperatura, readAll } = require('./storage');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Middleware CORS
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
+
 // Middleware para parsear JSON
 app.use(express.json());
 // Servir estáticos desde /public
@@ -30,6 +42,12 @@ app.post('/temperatura', (req, res) => {
 
 // Endpoint GET para recuperar todos los registros
 app.get('/temperaturas', (_req, res) => {
+  const data = readAll();
+  return res.status(200).json({ ok: true, data });
+});
+
+// Alias para el endpoint de temperaturas desde el frontend
+app.get('/api/temperaturas', (_req, res) => {
   const data = readAll();
   return res.status(200).json({ ok: true, data });
 });
