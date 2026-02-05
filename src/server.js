@@ -1,4 +1,5 @@
 const express = require('express');
+const { appendTemperatura } = require('./storage');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,8 +20,9 @@ app.post('/temperatura', (req, res) => {
     return res.status(400).json({ ok: false, error: 'El campo "temperatura" debe ser un número válido.' });
   }
 
-  // Respuesta simple: devolver el valor recibido
-  return res.status(200).json({ ok: true, temperatura });
+  // Guardar en JSON como nuevo registro
+  const saved = appendTemperatura(temperatura);
+  return res.status(201).json({ ok: true, saved });
 });
 
 // Salud básica
