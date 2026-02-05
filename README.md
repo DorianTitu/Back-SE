@@ -75,6 +75,21 @@ Opcional: variables de entorno adicionales pueden configurarse en Render si las 
 
 - `GET /` (salud): devuelve estado básico y lista de endpoints.
 
+- `GET /temperaturas`: lista todos los registros guardados en `data/temperaturas.json`.
+
+## Frontend sencillo
+
+Incluye una página estática accesible en `/web` que muestra los registros y tiene botón "Actualizar".
+
+Local:
+```bash
+npm run dev
+# abre en el navegador: http://localhost:3000/web
+```
+
+Render:
+- Una vez desplegado, visita: `https://back-se.onrender.com/web`
+
 ## Ejemplos de consumo
 
 - `curl`:
