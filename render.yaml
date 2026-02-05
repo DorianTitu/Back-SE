@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: back-se
+    env: docker
+    plan: free
+    autoDeploy: true
+    healthCheckPath: /
+    dockerfilePath: Dockerfile
